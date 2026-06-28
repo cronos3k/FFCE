@@ -1,11 +1,11 @@
 # FFCE Web — Flow Field Chess
 
+### ▶ [Play the live demo](https://gamedev.tech/games/ffce/play/) &nbsp;·&nbsp; 📄 [Read the paper (PDF)](https://gamedev.tech/games/ffce/paper/flow-field-chess.pdf)
+
 A browser-playable chess game whose AI thinks in **flow fields** instead of a
 search tree. The engine (rules + AI) is written in **Rust and compiled to
 WebAssembly**; the browser layer is a thin HTML/CSS/JS shell. No server is
 required to play — the folder is statically deployable.
-
-**▶ Play it live:** https://gamedev.tech/games/ffce/play/
 
 This is the first game for the **gamedev.tech** platform and follows its north
 star: *Rust/WASM owns the engine logic; JS is a thin browser shell.*
