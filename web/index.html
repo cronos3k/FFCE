@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FFCE — Flow Field Chess</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="left">
+      <h1>Flow Field Chess</h1>
+      <p class="subtitle">Rust → WebAssembly. The AI resolves fields, not a search tree.</p>
+      <p class="links">
+        <a href="../paper/flow-field-chess.pdf" target="_blank" rel="noopener">📄 Read the paper (PDF)</a>
+        <span class="sep">·</span>
+        <a href="../">About</a>
+        <span class="sep">·</span>
+        <a href="/">GameDev.Tech</a>
+      </p>
+      <div class="board-wrap">
+        <div id="board" aria-label="chess board"></div>
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+      <div id="turn">Loading…</div>
+      <div id="status"></div>
+      <div class="keyhelp">Keys: 1-7 overlay · H histogram · E extras on/off · X cycle extra · A AI mode · N step · R reset</div>
+    </div>
+
+    <div class="panel">
+      <div class="section">
+        <h2>Game</h2>
+        <label for="side">Play as</label>
+        <select id="side">
+          <option value="white" selected>White (you move first)</option>
+          <option value="black">Black</option>
+        </select>
+        <div class="ai-mode">AI: <span id="aimode">Black</span></div>
+        <label for="noise">AI weirdness (noise): <span id="noiseval">0.18</span></label>
+        <input id="noise" type="range" min="0" max="0.6" step="0.02" value="0.18" />
+        <button id="newgame">New game</button>
+      </div>
+
+      <div class="section">
+        <h2>Overlay</h2>
+        <select id="overlayMode">
+          <option value="0" selected>None</option>
+          <option value="1">Net pressure</option>
+          <option value="2">Resistance</option>
+          <option value="3">Trace</option>
+          <option value="4">Attack</option>
+          <option value="5">Extras sum</option>
+          <option value="6">Selected extra</option>
+          <option value="7">Flow</option>
+        </select>
+        <label for="selExtra">Selected extra</label>
+        <select id="selExtra"></select>
+        <label class="check"><input id="histToggle" type="checkbox" /> Histogram</label>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="extras">Extras</button>
+        <button class="tab" data-tab="docs">Docs</button>
+        <button class="tab" data-tab="file">File</button>
+      </div>
+
+      <div class="tabbody">
+        <div id="tab-extras" class="tabpane active">
+          <div class="extras-buttons">
+            <button id="allOn">All On</button>
+            <button id="allOff">All Off</button>
+          </div>
+          <div id="extrasList"></div>
+        </div>
+
+        <div id="tab-docs" class="tabpane">
+          <select id="docSelect"></select>
+          <pre id="docText"></pre>
+        </div>
+
+        <div id="tab-file" class="tabpane">
+          <p class="filenote">FFCE Web — a faithful Rust/WASM port of the Python
+          Flow Field Chess Engine.</p>
+          <p class="filenote">Engine: full legal move generation (perft-validated),
+          the five core fields (Pressure, Attack, Resistance, Trace, Flow) plus
+          the 13 toggleable extra algorithms, scored single-ply.</p>
+          <p class="filenote">Click an algorithm name in the Extras tab to read
+          its formula in the Docs tab.</p>
+          <p class="filenote"><a href="../paper/flow-field-chess.pdf" target="_blank" rel="noopener">Read the full paper (PDF)</a>
+          — the concept and its mathematics.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="promo">
+    <div class="box">
+      <div>Promote to:</div>
+      <div class="choices">
+        <button data-p="5">Q</button>
+        <button data-p="4">R</button>
+        <button data-p="3">B</button>
+        <button data-p="2">N</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="wasm_inline.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

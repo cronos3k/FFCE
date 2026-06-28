@@ -1,0 +1,14 @@
+# Rust build output
+/target
+/crate/target
+
+# Deploy staging (not part of the engine repo)
+/site
+
+# Logs / scratch
+*.log
+*.err.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

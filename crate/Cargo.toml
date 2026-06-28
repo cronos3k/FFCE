@@ -1,0 +1,16 @@
+[package]
+name = "ffce_engine"
+version = "0.1.0"
+edition = "2021"
+description = "Flow Field Chess Engine (FFCE) ported to Rust/WASM"
+license = "MIT"
+
+[lib]
+# cdylib -> wasm artifact for the browser; rlib -> native unit tests (perft).
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
+codegen-units = 1

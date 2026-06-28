@@ -1,0 +1,202 @@
+/* FFCE Web theme — mirrors the pygame GUI (ui.py).
+   Board light (240,235,220) / dark (120,160,130); desktop dark chrome. */
+:root {
+  --light-sq: rgb(240, 235, 220);
+  --dark-sq: rgb(120, 160, 130);
+  --select: rgb(235, 200, 80);
+  --move: rgb(80, 180, 120);
+  --capture: rgb(200, 80, 80);
+  --lastmove: rgb(80, 120, 200);
+  --check: rgb(220, 60, 60);
+  --bg: rgb(20, 20, 20);
+  --panel: rgb(22, 22, 22);
+  --panel-border: rgb(40, 40, 40);
+  --header: rgb(228, 228, 228);
+  --text: rgb(200, 200, 200);
+  --muted: rgb(150, 150, 150);
+  --accent: rgb(120, 200, 130);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, Roboto, sans-serif;
+  font-size: 14px;
+}
+
+.app {
+  display: flex;
+  gap: 18px;
+  padding: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.left { display: flex; flex-direction: column; }
+h1 { font-size: 1.3rem; margin: 4px 0 2px; color: var(--header); }
+.subtitle { color: var(--muted); font-size: 0.8rem; margin: 0 0 4px; }
+.links { font-size: 0.8rem; margin: 0 0 12px; }
+.links a { color: rgb(120, 200, 200); text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+.links .sep { color: var(--panel-border); margin: 0 6px; }
+
+.board-wrap {
+  position: relative;
+  width: min(82vw, 560px);
+  height: min(82vw, 560px);
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--panel-border);
+}
+
+#overlayCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+.cell.light { background: var(--light-sq); }
+.cell.dark { background: var(--dark-sq); }
+
+/* Highlights drawn as inset borders / dots like the pygame version. */
+.cell.selected { box-shadow: inset 0 0 0 4px var(--select); }
+.cell.lastmove { box-shadow: inset 0 0 0 3px var(--lastmove); }
+.cell.check { box-shadow: inset 0 0 0 4px var(--check); }
+.cell.target::after,
+.cell.capture::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 30%; height: 30%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 3;
+}
+.cell.target::after { background: var(--move); }
+.cell.capture::after { background: var(--capture); }
+
+.piece {
+  width: 90%;
+  height: 90%;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: contain;
+  /* 16x16 pixel-art sprites: scale up with nearest-neighbor, not blur */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+#turn { font-size: 1rem; font-weight: 600; color: var(--header); margin-top: 12px; }
+#status { font-size: 0.9rem; color: var(--accent); min-height: 1.2em; }
+.keyhelp { font-size: 0.72rem; color: var(--muted); margin-top: 10px; max-width: 560px; line-height: 1.5; }
+
+/* ---- Right panel -------------------------------------------------------- */
+.panel {
+  width: 320px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 12px;
+}
+.section { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--panel-border); }
+.section h2 { font-size: 0.95rem; margin: 0 0 8px; color: var(--header); }
+label { display: block; font-size: 0.78rem; color: var(--muted); margin: 8px 0 3px; }
+label.check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+select, input[type="range"] { width: 100%; }
+select {
+  background: rgb(30, 30, 30);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 3px;
+  padding: 4px;
+}
+.ai-mode { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+button {
+  background: rgb(45, 60, 48);
+  color: var(--header);
+  border: 1px solid var(--panel-border);
+  border-radius: 3px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover { background: rgb(60, 80, 64); }
+#newgame { width: 100%; margin-top: 10px; }
+
+/* ---- Tabs --------------------------------------------------------------- */
+.tabs { display: flex; gap: 2px; }
+.tab {
+  flex: 1;
+  background: rgb(28, 28, 28);
+  border-radius: 3px 3px 0 0;
+  padding: 7px 4px;
+  color: var(--muted);
+}
+.tab.active { background: rgb(38, 44, 38); color: var(--header); border-bottom: 2px solid var(--accent); }
+.tabbody {
+  border: 1px solid var(--panel-border);
+  border-radius: 0 0 4px 4px;
+  padding: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+.tabpane { display: none; }
+.tabpane.active { display: block; }
+
+.extras-buttons { display: flex; gap: 6px; margin-bottom: 10px; }
+.extras-buttons button { flex: 1; font-size: 0.78rem; padding: 5px; }
+
+.extra-row { margin-bottom: 9px; }
+.extra-head { display: flex; align-items: center; gap: 6px; }
+.extra-head input[type="checkbox"] { margin: 0; }
+.extra-name {
+  flex: 1;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text);
+  border-left: 4px solid transparent;
+  padding-left: 6px;
+}
+.extra-name:hover { color: var(--header); text-decoration: underline; }
+.extra-val { font-size: 0.72rem; color: var(--muted); min-width: 34px; text-align: right; }
+.extra-row input[type="range"] { margin-top: 3px; }
+
+#docText {
+  white-space: pre-wrap;
+  font-family: "Consolas", monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  margin-top: 8px;
+  line-height: 1.45;
+}
+.filenote { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+/* ---- Promotion modal ---------------------------------------------------- */
+#promo {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none; align-items: center; justify-content: center; z-index: 20;
+}
+#promo.show { display: flex; }
+#promo .box { background: var(--panel); border: 1px solid var(--panel-border); padding: 18px; border-radius: 6px; text-align: center; color: var(--header); }
+#promo .choices { display: flex; gap: 10px; margin-top: 10px; }
+#promo button { width: 52px; height: 52px; font-size: 1.2rem; }
