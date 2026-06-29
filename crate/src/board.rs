@@ -609,4 +609,30 @@ mod tests {
         assert!(b.find_king(WHITE).is_some());
         assert!(b.find_king(BLACK).is_some());
     }
+
+    // Regression for the "stalemate should be a win" report: lone black king on
+    // a7 with White Qc8 + Rb3 (+ bishop) covering every escape square. Black is
+    // NOT in check, so standard rules call it a draw; we assert the genuine
+    // stalemate conditions here. ffce_status() maps no-legal-moves to a win for
+    // the trapper, so this position is scored as a White win, not a draw.
+    #[test]
+    fn trapped_king_is_genuine_stalemate() {
+        let mut b = Board::empty();
+        // files a..h = x 0..7, ranks 1..8 = y 0..7
+        b.add_piece(QUEEN, WHITE, 2, 7); // Qc8
+        b.add_piece(ROOK, WHITE, 1, 2); // Rb3 (covers b-file incl. b6)
+        b.add_piece(BISHOP, WHITE, 4, 1); // Be2 (covers a6 too)
+        b.add_piece(KING, WHITE, 7, 0); // wKh1 (just to be a valid position)
+        b.add_piece(KING, BLACK, 0, 6); // bKa7
+        b.side_to_move = BLACK;
+
+        assert!(
+            !b.is_in_check(BLACK),
+            "black king must not be in check (else it'd be checkmate, not stalemate)"
+        );
+        assert!(
+            b.generate_legal_moves(BLACK).is_empty(),
+            "black must have no legal moves: a8/b8/b7/a6 covered by queen+bishop, b6 by rook"
+        );
+    }
 }

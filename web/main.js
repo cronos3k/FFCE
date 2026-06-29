@@ -161,10 +161,14 @@ function updateStatus(side, checkW, checkB) {
     statusEl.textContent = state.busy ? "AI is thinking…" : (state.lastAiMs ? `AI moved in ${state.lastAiMs} ms` : "");
   } else {
     turnEl.textContent = "Game over";
+    // The loser is the side to move with no legal moves; in check = checkmate,
+    // otherwise stalemate (which, in this engine, is still a win for the trapper).
+    const loserInCheck = (side === WHITE) ? checkW : checkB;
+    const how = loserInCheck ? "Checkmate" : "Stalemate";
     statusEl.textContent =
-      st === STATUS.WHITE_WINS ? "Checkmate — White wins" :
-      st === STATUS.BLACK_WINS ? "Checkmate — Black wins" :
-      st === STATUS.STALEMATE ? "Stalemate — draw" : "Draw (50-move rule)";
+      st === STATUS.WHITE_WINS ? `${how} — White wins` :
+      st === STATUS.BLACK_WINS ? `${how} — Black wins` :
+      "Draw (50-move rule)";
   }
 }
 

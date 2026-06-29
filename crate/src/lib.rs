@@ -225,15 +225,15 @@ pub extern "C" fn ffce_status() -> i32 {
     if !moves.is_empty() {
         return 0;
     }
-    if e.board.is_in_check(e.board.side_to_move) {
-        // Side to move is checkmated; the other side wins.
-        if e.board.side_to_move == WHITE {
-            2
-        } else {
-            1
-        }
+    // No legal moves: the side to move loses. If in check this is checkmate;
+    // if not, it is stalemate. Flow Field Chess uses the historical
+    // "stalemate = win" rule — a fully trapped king loses rather than escaping
+    // with a draw — so both cases award the win to the other side. The caller
+    // (UI) distinguishes mate vs stalemate via ffce_in_check on the loser.
+    if e.board.side_to_move == WHITE {
+        2
     } else {
-        3
+        1
     }
 }
 
