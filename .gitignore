@@ -2,8 +2,10 @@
 /target
 /crate/target
 
-# Deploy staging (not part of the engine repo)
-/site
+# Deploy staging copies (duplicates of web/ and the built paper) — ignored.
+# site/index.html (the landing page source) IS tracked, just not these copies.
+/site/play/
+/site/paper/
 
 # Logs / scratch
 *.log

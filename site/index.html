@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow Field Chess — GameDev.Tech</title>
+  <meta name="description" content="A chess engine that thinks in fields, not search trees. A joyfully unfit opponent, compiled Rust → WebAssembly. Play it in your browser." />
+  <style>
+    :root {
+      --bg: #0a0a0a; --fg: #e0e0e0; --muted: #8b949e; --dim: #888;
+      --card: #161b22; --border: #30363d; --link: #58a6ff;
+      --accent1: #00ff88; --accent2: #00aaff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--fg); margin: 0;
+      line-height: 1.65; padding-bottom: 64px;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
+    .topnav { padding: 1rem 1.25rem; }
+    .topnav a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+    .topnav a:hover { color: var(--link); }
+
+    .hero { text-align: center; padding: 2.5rem 0 1rem; }
+    h1 {
+      font-size: 3rem; margin: 0 0 0.5rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .tagline { color: var(--dim); font-size: 1.2rem; margin: 0 auto 1.75rem; max-width: 36rem; }
+    .cta { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; text-decoration: none; border-radius: 8px;
+      padding: 0.8rem 1.6rem; font-size: 1.1rem; font-weight: 600; transition: 0.2s;
+    }
+    .btn-play {
+      color: #03210f; background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border: 1px solid transparent;
+    }
+    .btn-play:hover { filter: brightness(1.1); }
+    .btn-ghost { color: var(--link); background: var(--card); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--link); }
+
+    h2 { font-size: 1.5rem; margin: 2.5rem 0 0.75rem; color: #f0f0f0; }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.4rem; color: #f0f0f0; }
+    p { color: #c8c8c8; }
+    .lead { font-size: 1.1rem; color: var(--fg); }
+
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+    .field { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1rem; }
+    .field b { color: var(--accent1); display: block; margin-bottom: 0.2rem; }
+    .field span { color: var(--muted); font-size: 0.9rem; }
+
+    .papercard {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1.1rem 1.25rem; margin: 1rem 0;
+    }
+    .papercard .pc-body { flex: 1; min-width: 220px; }
+    .papercard .pc-body span { color: var(--muted); font-size: 0.9rem; display: block; }
+    .tag { display: inline-block; font-size: 0.72rem; color: #03210f; background: var(--accent1);
+           border-radius: 4px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; font-weight: 700; }
+
+    .essay { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+    .essay h2:first-child { margin-top: 0.5rem; }
+    .essay ul { padding-left: 1.2rem; }
+    .essay li { margin: 0.35rem 0; color: #c8c8c8; }
+    .essay .formula { color: var(--accent2); font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; }
+    .byline { color: var(--muted); font-size: 0.9rem; font-style: italic; }
+
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0; padding: 8px; text-align: center;
+      font-size: 11px; color: #666; background: rgba(10,10,10,0.85); border-top: 1px solid #222;
+    }
+    footer a { color: var(--link); margin: 0 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="topnav"><a href="/">&larr; GameDev.Tech</a></nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <h1>Flow Field Chess</h1>
+      <p class="tagline">A chess engine that thinks in <em>fields</em>, not search trees.
+        A joyfully unfit opponent &mdash; compiled Rust&nbsp;&rarr;&nbsp;WebAssembly, runs entirely in your browser.</p>
+      <div class="cta">
+        <a class="btn btn-play" href="play/">&#9654;&nbsp; Play now</a>
+        <a class="btn btn-ghost" href="paper/flow-field-chess.pdf">Read the paper (PDF)</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>What is a flow-field engine?</h2>
+      <p class="lead">Most chess computers search: they look millions of moves ahead and lean on
+        opening books and endgame tables. Flow Field Chess does none of that. It treats the board as a
+        physical space and lets each piece radiate <em>influence</em> &mdash; a terrain of pressure,
+        attack, resistance, momentum and diffusion. Every turn it rebuilds that terrain from scratch
+        and simply flows downhill. No search tree. No database. No memory of how chess is "supposed"
+        to go.</p>
+      <p>The result is an opponent that is clever, sometimes baffling, occasionally terrible, and
+        nearly always interesting &mdash; a peculiar mathematician who never read an opening book but
+        is intensely curious about gradients.</p>
+    </section>
+
+    <section>
+      <h2>The five core fields</h2>
+      <div class="fields">
+        <div class="field"><b>Pressure</b><span>Signed map of advantage, P = F<sub>w</sub> &minus; F<sub>b</sub>.</span></div>
+        <div class="field"><b>Attack</b><span>Who can hit what, weighted by piece strength.</span></div>
+        <div class="field"><b>Resistance</b><span>Friction from occupancy, threats and king zones.</span></div>
+        <div class="field"><b>Trace</b><span>Movement memory &amp; intent via quaternion heading.</span></div>
+        <div class="field"><b>Flow</b><span>Diffusion of influence through resistance over time.</span></div>
+      </div>
+      <p>These five are the skeleton; a toolbox of borrowed algorithms (reaction&ndash;diffusion,
+        Ising spins, lattice&ndash;Boltzmann, and more) adds flavour. The full mathematics is in the paper.</p>
+    </section>
+
+    <section>
+      <h2>The paper</h2>
+      <div class="papercard">
+        <div class="pc-body">
+          <strong>Flow Field Chess: A Deliberately Unfit Engine</strong> <span class="tag">PUBLISHED</span>
+          <span>The concept and its mathematics &mdash; fields, kernels, diffusion, the quaternion trace
+            and a Hamiltonian view. A non-competitive engine, presented honestly.<br>
+            DOI: <a href="https://doi.org/10.5281/zenodo.21028769">10.5281/zenodo.21028769</a> (CC&#8209;BY&#8209;4.0) &middot;
+            <a href="https://www.academia.edu/169378515/Flow_Field_Chess_A_Deliberately_Unfit_Engine_for_a_Genuinely_Fun_Game">academia.edu</a></span>
+        </div>
+        <a class="btn btn-ghost" href="paper/flow-field-chess.pdf">PDF</a>
+      </div>
+      <p class="byline">Below: the original informal essay that started it all.</p>
+    </section>
+
+    <article class="essay">
+      <h2>Flow Field Chess: A Joyfully Unfit Chess Engine</h2>
+
+      <h3>Abstract</h3>
+      <p>This project is not a chess engine in the normal sense. It is a math lab dressed in a chess
+        suit. Instead of opening books, endgame tablebases, or a brute force search, this system runs
+        a collection of physical and mathematical algorithms that were never designed for chess at all.
+        The result is a player that is often clever, sometimes baffling, occasionally bad, and nearly
+        always interesting. The goal is not perfection. The goal is a fair and fun opponent that sees
+        the same board you see and reasons from the same geometry you see, just through a strange lens.</p>
+
+      <h3>Why this exists</h3>
+      <p>By the late 1990s, chess computers were already statistical beasts. They could search deep,
+        memorize millions of positions, and use data gathered from every grandmaster game they could
+        find. That is impressive and also profoundly unfun. It is not you versus a rival mind. It is
+        you versus an encyclopedia with an electric motor.</p>
+      <p>Flow Field Chess aims for something different: a computer opponent that is not omniscient. It
+        does not "know" chess. It only sees the pieces, the geometry, and a set of formulas that
+        evaluate fields in space and time. The opponent is a math student, not a chess god.</p>
+
+      <h3>The core principle</h3>
+      <p>Everything in this engine is a field, and every field is computed from the current board
+        state. The AI is forced to learn the board from scratch every turn. It cannot reference a
+        database. It cannot peek at a library of openings. It can only evaluate the fields that the
+        formulas create and then move based on those fields. That constraint is what makes the games
+        feel fair and engaging.</p>
+
+      <h3>The core fields (the structural backbone)</h3>
+      <ul>
+        <li><b>Pressure Field</b> (<span class="formula">P = F_w &minus; F_b</span>) &mdash; a signed
+          pressure map of the board: a terrain model of advantage, positive slopes favouring White and
+          negative slopes favouring Black. It keeps the system grounded in a coherent picture of control.</li>
+        <li><b>Attack Field</b> (A) &mdash; a reach map for every piece, weighted by piece strength. A
+          first-order approximation of "who can hit what" right now. It keeps the system tactically honest.</li>
+        <li><b>Resistance Field</b> (R) &mdash; friction: occupancy, enemy attacks, pawn locks and king
+          zones all raise the cost of influence moving through a square. It stops flow from cutting
+          unrealistically through dangerous or blocked space.</li>
+        <li><b>Trace Field</b> (T) &mdash; movement memory and intent. It records recent paths and
+          projects likely future directions from the quaternion-based heading of a piece. This adds
+          momentum and reduces jitter.</li>
+        <li><b>Flow Field</b> (F) &mdash; the diffusion of sources through resistance. It is the engine
+          room for pressure, propagating influence across time without a search tree.</li>
+      </ul>
+      <p>These five fields are the skeleton. Everything else is flavour.</p>
+
+      <h3>The extra algorithms (the wild experiments)</h3>
+      <p>Every extra algorithm is optional. Each one is intentionally "wrong" for chess in the sense
+        that it was created for an entirely different domain. The fun is watching how these foreign
+        tools still produce chess-like behaviour.</p>
+      <ul>
+        <li><b>Reaction&ndash;Diffusion</b> &mdash; a chemistry pattern generator (Gray&ndash;Scott)
+          that blooms influence like biological skin patterns, creating surprising local hotspots.</li>
+        <li><b>Cellular Automata</b> &mdash; a Life-like grid evolution on a pressure threshold. It
+          rewards stable colonies near the enemy king and punishes isolated noise.</li>
+        <li><b>Resistor Network</b> &mdash; treat the board as a circuit. Pieces become voltage
+          sources, resistance dampens flow, and the field relaxes to equilibrium.</li>
+        <li><b>Ising Spin</b> &mdash; a statistical-physics model where spins align with neighbours and
+          an external field, producing stable clusters of advantage.</li>
+        <li><b>Wave Resonance</b> &mdash; a damped wave equation on the grid, rewarding resonant
+          corridors and "ringing" pathways toward the enemy king.</li>
+        <li><b>Lattice&ndash;Boltzmann</b> &mdash; a simplified fluid transport model. Influence moves
+          like a slow current, clinging to open space and avoiding obstacles.</li>
+        <li><b>Spectral Low-Frequency</b> &mdash; repeated smoothing filters away tactical noise and
+          highlights global positional trends.</li>
+        <li><b>Hodge Curl</b> &mdash; uses Laplacian magnitude as a proxy for rotational flow and trap
+          potential.</li>
+        <li><b>Ant Pheromone</b> &mdash; pieces seed pheromone, which diffuses and decays: a memory
+          field for long-term influence.</li>
+        <li><b>Fuzzy Future</b> &mdash; each piece becomes a Gaussian cloud of potential future
+          presence; a probabilistic influence map rather than a hard prediction.</li>
+        <li><b>Topo Persistence</b> &mdash; finds connected pressure regions touching king zones,
+          favouring stable, connected territory.</li>
+        <li><b>Latent Channels</b> &mdash; a synthetic feature map combining pressure, gradient and
+          trace; like a handcrafted embedding of the position.</li>
+        <li><b>Tensor Kernel</b> &mdash; each piece stamps a tiny kernel; the sum becomes a soft
+          density field of power and control.</li>
+      </ul>
+
+      <h3>Why this is fun to play</h3>
+      <p>The system is intentionally limited. It is not searching twenty moves ahead, so it makes
+        mistakes. It does not know openings, so it gets confused. It often sees patterns you do not see
+        and misses tactics you do see. That is exactly the sweet spot for a human opponent: competitive,
+        but also fallible.</p>
+      <p>You are not facing a chess god. You are facing a peculiar mathematician who knows nothing about
+        chess but is intensely curious about gradients, diffusion and fields. It feels like playing
+        against a human who only read the rules last week and then built a physics simulator to help
+        them decide.</p>
+
+      <h3>Why this is a scientific exercise</h3>
+      <p>Most chess engines converge on the same approach: search, prune, evaluate, and rely on
+        enormous knowledge. This project explores the opposite: can we drive a game with mathematics
+        alone? Can we stitch together unrelated algorithms and still get coherent play? The answer is
+        surprisingly often yes. It is a way to study how rich behaviour can emerge from simple field
+        equations, and how far you can push "algorithmic intuition" without a search tree.</p>
+
+      <h3>Practical uses beyond chess</h3>
+      <p>These formulas are not toys. Reaction&ndash;diffusion drives biological modelling and
+        procedural graphics. Cellular automata model growth, fire, erosion and network spreading.
+        Resistor networks and flow diffusion power routing, terrain analysis and cost maps. Ising
+        models appear in statistical physics and probabilistic inference; wave models in acoustics and
+        vibration; lattice&ndash;Boltzmann in engineering fluid simulation. Low-frequency filtering is
+        signal processing 101. Curl tools come from fluid dynamics; pheromone models from swarm
+        optimization and logistics; Gaussian occupancy maps from robotics navigation; topological
+        persistence from data analysis; kernel methods from statistics, vision and machine learning.
+        So yes, this is chess &mdash; but the toolbox is absolutely real.</p>
+
+      <h3>The big claim</h3>
+      <p>This might be the worst chess engine ever written, and that is the point. It is not engineered
+        to win; it is engineered to think in creative, mathematical ways and to be entertaining. It
+        loses in a way that teaches you something. It wins in a way that makes you laugh. That is the
+        kind of "intelligence" we wanted: playful, imperfect, and fun.</p>
+
+      <h3>Closing note</h3>
+      <p>If you ever wished your chess opponent was less of a database and more of a strange professor
+        who refuses to stop talking about gradients, welcome home.</p>
+    </article>
+  </div>
+
+  <footer>
+    <a href="/">GameDev.Tech</a>
+    <a href="/impressum.html">Impressum</a>
+    <a href="/datenschutz.html">Datenschutz</a>
+  </footer>
+</body>
+</html>
