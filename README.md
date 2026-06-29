@@ -2,6 +2,8 @@
 
 ### ▶ [Play the live demo](https://gamedev.tech/games/ffce/play/) &nbsp;·&nbsp; 📄 [Read the paper (PDF)](https://gamedev.tech/games/ffce/paper/flow-field-chess.pdf)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21028769.svg)](https://doi.org/10.5281/zenodo.21028769) &nbsp; [Paper on academia.edu](https://www.academia.edu/169378515/Flow_Field_Chess_A_Deliberately_Unfit_Engine_for_a_Genuinely_Fun_Game)
+
 A browser-playable chess game whose AI thinks in **flow fields** instead of a
 search tree. The engine (rules + AI) is written in **Rust and compiled to
 WebAssembly**; the browser layer is a thin HTML/CSS/JS shell. No server is
@@ -197,6 +199,27 @@ PNGs, and the highlight palette (select 235,200,80; move
 - The AI is intentionally not strong. It evaluates fields, not lines. With all
   13 extras enabled a turn still resolves in roughly 20 ms in the browser.
 
+## Citation
+
+If you reference this work, please cite the paper:
+
+> Koch, Gregor Hubert Max. *Flow Field Chess: A Deliberately Unfit Engine for a
+> Genuinely Fun Game.* 2026. Zenodo. https://doi.org/10.5281/zenodo.21028769
+
+- DOI: **[10.5281/zenodo.21028769](https://doi.org/10.5281/zenodo.21028769)** (CC-BY-4.0)
+- academia.edu: https://www.academia.edu/169378515/Flow_Field_Chess_A_Deliberately_Unfit_Engine_for_a_Genuinely_Fun_Game
+
+```bibtex
+@misc{koch2026ffce,
+  author       = {Koch, Gregor Hubert Max},
+  title        = {Flow Field Chess: A Deliberately Unfit Engine for a Genuinely Fun Game},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.21028769},
+  url          = {https://doi.org/10.5281/zenodo.21028769}
+}
+```
+
 ## License
 
-[GPL-3.0](LICENSE). © Gregor Koch (cronos3k).
+Code: [GPL-3.0](LICENSE). Paper: CC-BY-4.0. © 2026 Gregor Hubert Max Koch (cronos3k).
