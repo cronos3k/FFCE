@@ -82,8 +82,9 @@
   <div class="wrap">
     <header class="hero">
       <h1>Flow Field Chess</h1>
-      <p class="tagline">A chess engine that thinks in <em>fields</em>, not search trees.
-        A joyfully unfit opponent &mdash; compiled Rust&nbsp;&rarr;&nbsp;WebAssembly, runs entirely in your browser.</p>
+      <p class="tagline">A chess engine that thinks in <em>fields</em>, not search trees &mdash; a deliberately
+        unfit opponent that reasons from physics instead of a database. Rust&nbsp;&rarr;&nbsp;WebAssembly,
+        entirely in your browser.</p>
       <div class="cta">
         <a class="btn btn-play" href="play/">&#9654;&nbsp; Play now</a>
         <a class="btn btn-ghost" href="paper/flow-field-chess.pdf">Read the paper (PDF)</a>
@@ -92,15 +93,14 @@
 
     <section>
       <h2>What is a flow-field engine?</h2>
-      <p class="lead">Most chess computers search: they look millions of moves ahead and lean on
+      <p class="lead">Most chess computers search &mdash; millions of positions deep, propped up by
         opening books and endgame tables. Flow Field Chess does none of that. It treats the board as a
-        physical space and lets each piece radiate <em>influence</em> &mdash; a terrain of pressure,
-        attack, resistance, momentum and diffusion. Every turn it rebuilds that terrain from scratch
-        and simply flows downhill. No search tree. No database. No memory of how chess is "supposed"
-        to go.</p>
-      <p>The result is an opponent that is clever, sometimes baffling, occasionally terrible, and
-        nearly always interesting &mdash; a peculiar mathematician who never read an opening book but
-        is intensely curious about gradients.</p>
+        physical space and lets every piece radiate <em>influence</em>: a terrain of pressure, attack,
+        resistance, momentum and diffusion. Each turn it rebuilds that terrain from scratch and simply
+        flows downhill. No search tree. No database. No memory of how chess is &ldquo;supposed&rdquo; to go.</p>
+      <p>What comes out is an opponent that is clever, occasionally baffling, sometimes plainly bad, and
+        nearly always interesting &mdash; a peculiar mathematician who never opened a theory book but is
+        suspiciously well-read on gradients.</p>
     </section>
 
     <section>
@@ -112,8 +112,9 @@
         <div class="field"><b>Trace</b><span>Movement memory &amp; intent via quaternion heading.</span></div>
         <div class="field"><b>Flow</b><span>Diffusion of influence through resistance over time.</span></div>
       </div>
-      <p>These five are the skeleton; a toolbox of borrowed algorithms (reaction&ndash;diffusion,
-        Ising spins, lattice&ndash;Boltzmann, and more) adds flavour. The full mathematics is in the paper.</p>
+      <p>These five are the skeleton; a drawer of borrowed algorithms (reaction&ndash;diffusion,
+        Ising spins, lattice&ndash;Boltzmann, and ten more) supplies the personality. The full mathematics
+        lives in the paper.</p>
     </section>
 
     <section>
