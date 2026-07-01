@@ -12,7 +12,7 @@ pub mod extras;
 pub mod fields;
 pub mod quaternion;
 
-use ai::{choose_move, Rng};
+use ai::{choose_move_avoiding, Rng};
 use board::{Board, Move};
 use constants::{Params, BLACK, WHITE};
 use extras::ExtrasConfig;
@@ -39,12 +39,16 @@ struct Engine {
     move_count: usize,
     overlay_buf: [f32; 64],
     analysis: Option<eval::Analysis>,
+    /// Position hashes reached so far this game (for loop/repetition detection).
+    history: Vec<u64>,
 }
 
 impl Engine {
     fn new(seed: u64) -> Engine {
+        let board = Board::new();
+        let start_hash = board.position_hash();
         Engine {
-            board: Board::new(),
+            board,
             rng: Rng::new(seed),
             params: Params::default(),
             config: ExtrasConfig::default(),
@@ -54,6 +58,7 @@ impl Engine {
             move_count: 0,
             overlay_buf: [0.0f32; 64],
             analysis: None,
+            history: vec![start_hash],
         }
     }
 
@@ -109,6 +114,8 @@ pub extern "C" fn ffce_new(seed: u32) {
 pub extern "C" fn ffce_reset() {
     let e = engine();
     e.board = Board::new();
+    e.history.clear();
+    e.history.push(e.board.position_hash());
     e.invalidate();
 }
 
@@ -175,6 +182,7 @@ pub extern "C" fn ffce_make_move(fx: i32, fy: i32, tx: i32, ty: i32, promo: i32)
     match find_legal_move(&e.board, fx, fy, tx, ty, want_promo) {
         Some(m) => {
             e.board.apply_move(&m);
+            e.history.push(e.board.position_hash());
             e.invalidate();
             1
         }
@@ -202,11 +210,13 @@ pub extern "C" fn ffce_ai_move(noise_sigma: f32) -> i32 {
         let params = &e.params;
         let cw = &e.cw;
         let config = &e.config;
-        choose_move(board, rng, params, cw, config, noise_sigma)
+        let history = &e.history;
+        choose_move_avoiding(board, rng, params, cw, config, noise_sigma, history)
     };
     match chosen {
         Some(m) => {
             e.board.apply_move(&m);
+            e.history.push(e.board.position_hash());
             e.invalidate();
             pack_move(&m)
         }

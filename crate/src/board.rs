@@ -121,6 +121,35 @@ impl Board {
         &self.pieces[(id - 1) as usize]
     }
 
+    /// Position fingerprint by piece type/colour per square (+ side to move,
+    /// castling, en-passant). Two positions that look identical hash equal,
+    /// regardless of internal piece ids. Used for repetition/loop detection.
+    pub fn position_hash(&self) -> u64 {
+        let mut h: u64 = 0xcbf2_9ce4_8422_2325; // FNV-1a offset basis
+        for y in 0..8 {
+            for x in 0..8 {
+                let id = self.board[y][x];
+                let code: u8 = if id == 0 {
+                    0
+                } else {
+                    let p = self.piece(id);
+                    (p.ptype) | if p.color == WHITE { 0 } else { 0x40 }
+                };
+                h ^= code as u64;
+                h = h.wrapping_mul(0x0100_0000_01b3);
+            }
+        }
+        h ^= if self.side_to_move == WHITE { 1 } else { 2 };
+        h = h.wrapping_mul(0x0100_0000_01b3);
+        h ^= self.castling as u64;
+        h = h.wrapping_mul(0x0100_0000_01b3);
+        if let Some((ex, ey)) = self.en_passant {
+            h ^= 0x100 | ((ex as u64) << 4) | (ey as u64);
+            h = h.wrapping_mul(0x0100_0000_01b3);
+        }
+        h
+    }
+
     /// Color of the piece occupying a square (assumes occupied).
     #[inline]
     fn color_at(&self, x: i32, y: i32) -> i32 {
