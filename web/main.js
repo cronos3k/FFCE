@@ -22,6 +22,8 @@ const state = {
   nExtras: 13,
   extras: [],            // [{enabled, mult, def}]
   lastAiMs: 0,
+  randomFields: false,   // AI-vs-AI: randomize each side's active fields
+  spCfg: null,           // { "1": bool[], "-1": bool[] } random configs per side
 };
 
 const boardEl = document.getElementById("board");
@@ -47,6 +49,35 @@ function aiControls(side) {
   if (state.aiMode === "black") return side === BLACK;
   if (state.aiMode === "white") return side === WHITE;
   return false;
+}
+
+// ---- AI-vs-AI ("both") + per-side field randomization -------------------
+function makeRandomSpConfigs() {
+  const gen = () => Array.from({ length: state.nExtras }, () => Math.random() < 0.5);
+  state.spCfg = { "1": gen(), "-1": gen() };
+}
+function applyEngineExtras(arr) {
+  for (let i = 0; i < state.nExtras; i++) state.engine.setExtra(i, arr[i] ? 1 : 0, 1.0);
+}
+function restoreUserExtras() {
+  for (let i = 0; i < state.nExtras; i++)
+    state.engine.setExtra(i, state.extras[i].enabled, state.extras[i].mult);
+}
+function updateSelfPlayUI() {
+  const btn = document.getElementById("selfplay");
+  if (btn) btn.textContent = state.aiMode === "both" ? "■ Stop AI vs AI" : "▶ AI vs AI (watch)";
+}
+function toggleSelfPlay() {
+  if (state.aiMode === "both") {
+    state.aiMode = state.humanSide === WHITE ? "black" : "white";
+    restoreUserExtras(); // hand the engine back the user's own field settings
+  } else {
+    state.aiMode = "both";
+    if (state.randomFields) makeRandomSpConfigs();
+  }
+  updateSelfPlayUI();
+  render();
+  scheduleAi();
 }
 
 // ---- board build / render ----------------------------------------------
@@ -154,6 +185,7 @@ function drawOverlay(side) {
 function updateStatus(side, checkW, checkB) {
   document.getElementById("aimode").textContent =
     state.aiMode.charAt(0).toUpperCase() + state.aiMode.slice(1);
+  updateSelfPlayUI();
   const st = state.engine.status();
   if (st === STATUS.ONGOING) {
     const chk = (side === WHITE && checkW) || (side === BLACK && checkB);
@@ -219,6 +251,11 @@ function scheduleAi() {
   state.busy = true;
   render();
   setTimeout(() => {
+    // In AI-vs-AI with randomization, give the side to move its own field mix.
+    if (state.randomFields && state.aiMode === "both" && state.spCfg) {
+      const cfg = state.spCfg[String(state.engine.sideToMove())];
+      if (cfg) applyEngineExtras(cfg);
+    }
     const t0 = performance.now();
     const m = state.engine.aiMove(state.noise);
     state.lastAiMs = Math.round(performance.now() - t0);
@@ -368,8 +405,9 @@ function setOverlayMode(m) {
 
 // ---- new game -----------------------------------------------------------
 function newGame() {
+  const wasSelfPlay = state.aiMode === "both";
   state.humanSide = document.getElementById("side").value === "black" ? BLACK : WHITE;
-  state.aiMode = state.humanSide === WHITE ? "black" : "white";
+  state.aiMode = wasSelfPlay ? "both" : (state.humanSide === WHITE ? "black" : "white");
   state.noise = parseFloat(document.getElementById("noise").value);
   state.engine.newGame((Math.random() * 0xffffffff) >>> 0);
   // Re-apply current extras config to the fresh engine.
@@ -380,6 +418,8 @@ function newGame() {
   state.lastMove = null;
   state.busy = false;
   state.lastAiMs = 0;
+  if (state.aiMode === "both" && state.randomFields) makeRandomSpConfigs();
+  updateSelfPlayUI();
   refreshLegal();
   render();
   scheduleAi();
@@ -430,6 +470,14 @@ async function boot() {
   showDoc("core_pressure", false);
 
   document.getElementById("newgame").addEventListener("click", newGame);
+  document.getElementById("selfplay").addEventListener("click", toggleSelfPlay);
+  document.getElementById("randFields").addEventListener("change", (e) => {
+    state.randomFields = e.target.checked;
+    if (state.aiMode === "both") {
+      if (state.randomFields) makeRandomSpConfigs();
+      else restoreUserExtras();
+    }
+  });
   document.getElementById("noise").addEventListener("input", (e) => {
     state.noise = parseFloat(e.target.value);
     document.getElementById("noiseval").textContent = state.noise.toFixed(2);

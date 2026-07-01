@@ -25,6 +25,7 @@
       <div id="turn">Loading…</div>
       <div id="status"></div>
       <div class="keyhelp">Keys: 1-7 overlay · H histogram · E extras on/off · X cycle extra · A AI mode · N step · R reset</div>
+      <p class="credit">Bug fix: the endless back-and-forth &ldquo;dance&rdquo; is patched &mdash; thanks to <b>Julian Ross</b> (IndieGamesDeveloper.com) for reporting it. The A.I. now detects a repetition loop and mixes in random extra field algorithms until it breaks out with a fresh move.</p>
     </div>
 
     <div class="panel">
@@ -39,6 +40,8 @@
         <label for="noise">AI weirdness (noise): <span id="noiseval">0.18</span></label>
         <input id="noise" type="range" min="0" max="0.6" step="0.02" value="0.18" />
         <button id="newgame">New game</button>
+        <button id="selfplay">&#9654; AI vs AI (watch)</button>
+        <label class="check"><input id="randFields" type="checkbox" /> Randomize fields per side</label>
       </div>
 
       <div class="section">

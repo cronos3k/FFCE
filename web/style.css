@@ -141,6 +141,9 @@ button {
 }
 button:hover { background: rgb(60, 80, 64); }
 #newgame { width: 100%; margin-top: 10px; }
+#selfplay { width: 100%; margin-top: 8px; }
+.credit { font-size: 0.75rem; color: var(--muted); margin-top: 12px; max-width: 560px; line-height: 1.55; border-top: 1px solid var(--panel-border); padding-top: 10px; }
+.credit b { color: var(--accent); }
 
 /* ---- Tabs --------------------------------------------------------------- */
 .tabs { display: flex; gap: 2px; }
